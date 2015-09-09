@@ -26,7 +26,7 @@ grails.project.dependency.resolution = {
         
         // Should match the Camel version that the Camel routing plugin is
         // using.
-        def camelVersion = "2.13.2"
+        def camelVersion = "2.15.0"
         compile "org.apache.camel:camel-spring:${camelVersion}"
         compile "org.apache.camel:camel-jms:${camelVersion}"
         compile "org.apache.camel:camel-xmljson:${camelVersion}"
