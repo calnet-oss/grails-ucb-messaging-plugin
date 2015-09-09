@@ -39,6 +39,6 @@ grails.project.dependency.resolution = {
         }
         
         // Camel plugin
-        compile ":routing:1.3.3-SNAPSHOT-UCB2"
+        compile ":routing:1.4.1-UCB1-SNAPSHOT"
     }
 }
