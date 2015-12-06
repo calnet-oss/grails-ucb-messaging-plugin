@@ -14,7 +14,7 @@ grails.project.dependency.resolution = {
         mavenRepo id: "calnet-repo", url: "https://maven.calnet.berkeley.edu/artifactory/all/"
     }
     dependencies {
-        def activeMQversion = '5.10.1'
+        def activeMQversion = '5.12.1'
         compile "org.apache.activemq:activemq-client:${activeMQversion}"
         compile "org.apache.activemq:activemq-pool:${activeMQversion}"
         compile "org.apache.activemq:activemq-camel:${activeMQversion}"
@@ -22,23 +22,23 @@ grails.project.dependency.resolution = {
         test "org.apache.activemq:activemq-kahadb-store:${activeMQversion}"
         
         // Extra dependencies for the Camel plugin
-        runtime "org.springframework:spring-beans:4.0.7.RELEASE" // workaround for <=2.4.4 - try taking out for Grails 2.4.5 or greater
+        runtime "org.springframework:spring-beans:4.1.8.RELEASE" // workaround for <=2.4.4 - try taking out for Grails 2.4.5 or greater
         
         // Should match the Camel version that the Camel routing plugin is
         // using.
-        def camelVersion = "2.15.0"
+        def camelVersion = "2.16.1"
         compile "org.apache.camel:camel-spring:${camelVersion}"
         compile "org.apache.camel:camel-jms:${camelVersion}"
         compile "org.apache.camel:camel-xmljson:${camelVersion}"
     }
 
     plugins {
-        build(":release:3.0.1",
-              ":rest-client-builder:1.0.3") {
+        build(":release:3.1.1",
+              ":rest-client-builder:2.1.1") {
             export = false
         }
         
         // Camel plugin
-        compile ":routing:1.4.1-UCB1-SNAPSHOT"
+        compile ":routing:1.4.1-UCB2-SNAPSHOT"
     }
 }
