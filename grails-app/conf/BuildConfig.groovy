@@ -20,10 +20,10 @@ grails.project.dependency.resolution = {
         compile "org.apache.activemq:activemq-camel:${activeMQversion}"
         test "org.apache.activemq:activemq-broker:${activeMQversion}"
         test "org.apache.activemq:activemq-kahadb-store:${activeMQversion}"
-        
+
         // Extra dependencies for the Camel plugin
         runtime "org.springframework:spring-beans:4.1.8.RELEASE" // workaround for <=2.4.4 - try taking out for Grails 2.4.5 or greater
-        
+
         // Should match the Camel version that the Camel routing plugin is
         // using.
         def camelVersion = "2.16.1"
@@ -34,11 +34,16 @@ grails.project.dependency.resolution = {
 
     plugins {
         build(":release:3.1.1",
-              ":rest-client-builder:2.1.1") {
+                ":rest-client-builder:2.1.1") {
             export = false
         }
-        
+
         // Camel plugin
         compile ":routing:1.4.1-UCB2-SNAPSHOT"
+
+        // the tests use SqlUtil
+        test("edu.berkeley.calnet.plugins:groovy-sql-util:0.1-SNAPSHOT") {
+            export = false
+        }
     }
 }
