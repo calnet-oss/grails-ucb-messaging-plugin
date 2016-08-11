@@ -42,7 +42,7 @@ grails.project.dependency.resolution = {
         compile ":routing:1.4.1-UCB2-SNAPSHOT"
 
         // the tests use SqlUtil
-        test("edu.berkeley.calnet.plugins:groovy-sql-util:0.1-SNAPSHOT") {
+        test("edu.berkeley.calnet.grails.plugins:groovy-sql-util:1.0.0-SNAPSHOT") {
             export = false
         }
     }
