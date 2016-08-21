@@ -1,0 +1,126 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        // If using a Maven proxy, put the property settings in
+        // ~/.gradle/gradle.properties for default_proxy_url,
+        // default_proxy_username and default_proxy_password.
+        if (project.hasProperty("default_proxy_url")) {
+            maven {
+                url project.property("default_proxy_url")
+                credentials {
+                    username project.property("default_proxy_username")
+                    password project.property("default_proxy_password")
+                }
+            }
+        }
+        jcenter()
+        mavenCentral()
+    }
+    dependencies {
+        classpath "io.spring.gradle:dependency-management-plugin:${spring_depmgmt_version}"
+        classpath "org.grails:grails-gradle-plugin:${grails_gradle_version}"
+    }
+}
+
+apply plugin: 'grails'
+apply plugin: 'project-report'
+apply plugin: "io.spring.dependency-management"
+apply plugin: 'maven-publish'
+
+//group = 'edu.berkeley.calnet.grails.plugins'
+group = 'edu.berkeley.calnet.plugins'
+version = '0.6-SNAPSHOT' // !!! Change in GroovySqlUtilGrailsPlugin.groovy too
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+grails {
+    grailsVersion = '2.5.4'
+    groovyVersion = '2.4.4'
+}
+
+repositories {
+    mavenLocal()
+    // If using a Maven proxy, put the property settings in
+    // ~/.gradle/gradle.properties for default_proxy_url,
+    // default_proxy_username and default_proxy_password.
+    if (project.hasProperty("default_proxy_url")) {
+        maven {
+            url project.property("default_proxy_url")
+            credentials {
+                username project.property("default_proxy_username")
+                password project.property("default_proxy_password")
+            }
+        }
+    }
+    jcenter()
+    grails.central()
+    mavenCentral()
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "edu.berkeley.calnet:gradle-grails-bom:${grails.grailsVersion}"
+    }
+}
+
+dependencies {
+    /*****************************************************************
+     * BEGIN STANDARD GRAILS DEPENDENCIES FROM gradle-grails-bom
+     *****************************************************************/
+    provided 'javax.servlet:javax.servlet-api'
+
+    test 'org.spockframework:spock-core'
+    /*****************************************************************
+     * END STANDARD GRAILS DEPENDENCIES FROM gradle-grails-bom
+     *****************************************************************/
+
+    def activeMQVersion = '5.12.1'
+    compile "org.apache.activemq:activemq-client:$activeMQVersion"
+    compile "org.apache.activemq:activemq-pool:$activeMQVersion"
+    compile "org.apache.activemq:activemq-camel:$activeMQVersion"
+    test "org.apache.activemq:activemq-broker:$activeMQVersion"
+    test "org.apache.activemq:activemq-kahadb-store:$activeMQVersion"
+
+    // Extra dependencies for the Camel plugin
+    runtime "org.springframework:spring-beans:4.1.8.RELEASE" // workaround for <=2.4.4 - try taking out for Grails 2.4.5 or greater
+
+    // Should match the Camel version that the Camel routing plugin is
+    // using.
+    def camelVersion = "2.16.1"
+    compile "org.apache.camel:camel-spring:$camelVersion"
+    compile "org.apache.camel:camel-jms:$camelVersion"
+    compile "org.apache.camel:camel-xmljson:$camelVersion"
+
+    // Camel plugin
+    compile "org.grails.plugins:routing:1.4.1-UCB2-SNAPSHOT"
+
+    // the tests use SqlUtil
+    test "edu.berkeley.calnet.grails.plugins:groovy-sql-util:1.1.0-SNAPSHOT"
+}
+
+// publishing with './gradlew publish'
+publish.dependsOn assemble
+publishToMavenLocal.dependsOn assemble
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifactId "ucb-messaging"
+            artifact("${project.name}-${project.version}.zip")
+        }
+    }
+
+    repositories {
+        maven {
+            // Put the property settings in ~/.gradle/gradle.properties for
+            // default_deploy_url, default_deploy_grails_plugin_repo
+            // default_deploy_username and default_deploy_password.
+            //url "${project.property('default_deploy_url')}/${default_deploy_grails_plugin_repo}"
+            url "${project.property('default_deploy_url')}/calnet-plugins}"
+            credentials {
+                username project.property("default_deploy_user")
+                password project.property("default_deploy_password")
+            }
+        }
+    }
+}
