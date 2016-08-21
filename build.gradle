@@ -69,6 +69,8 @@ dependencies {
      *****************************************************************/
     provided 'javax.servlet:javax.servlet-api'
 
+    test 'org.grails:grails-dependencies'
+
     test 'org.spockframework:spock-core'
     /*****************************************************************
      * END STANDARD GRAILS DEPENDENCIES FROM gradle-grails-bom
