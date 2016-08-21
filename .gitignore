@@ -12,3 +12,4 @@ atlassian-ide-plugin.xml
 .gradle
 build
 buildPlugins
+out
