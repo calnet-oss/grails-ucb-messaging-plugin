@@ -1,7 +1,6 @@
 package edu.berkeley.messaging.route
 
 import edu.berkeley.sor.query.util.CamelContextUtil
-import edu.berkeley.sql.SqlService
 import grails.test.spock.IntegrationSpec
 import groovy.sql.Sql
 import groovy.util.logging.Log4j
@@ -17,6 +16,7 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager
 import org.springframework.transaction.PlatformTransactionManager
 import spock.lang.Shared
 import spock.lang.Unroll
+import edu.berkeley.sql.SqlService
 
 import javax.sql.DataSource
 
@@ -88,24 +88,28 @@ class BasicInOutRouteIntegrationSpec extends IntegrationSpec {
     @Unroll
     void "test Camel success, fault and exception behavior"() {
         given:
-            new Sql(dataSource).execute("TRUNCATE TABLE Test" as String)
-            assert !countTestRows()
-            int successCount = 0
-            int successMessageCount = 0
-            int failureExceptionCount = 0
-            int failureFaultCount = 0
-            Map<String, Integer> exceptionMessageCount = [:]
-            testService.receivePreparationClosure = receivePreparationClosure
-            testService.routeEndpoint = routeEndpoint
+        new Sql(dataSource).execute("TRUNCATE TABLE Test" as String)
+        assert !countTestRows()
+        Object lock = new Object()
+        int successCount = 0
+        int successMessageCount = 0
+        int failureExceptionCount = 0
+        int failureFaultCount = 0
+        Map<String, Integer> exceptionMessageCount = [:]
+        testService.receivePreparationClosure = receivePreparationClosure
+        testService.routeEndpoint = routeEndpoint
 
         when:
-            for (int i = 0; i < quantityToSend; i++) {
-                testService.sendMessage(["test": "foobar"] as JSONObject, { def result ->
-                    successCount++
+        for (int i = 0; i < quantityToSend; i++) {
+            testService.sendMessage(["test": "foobar"] as JSONObject, { def result ->
+                synchronized (lock) {
                     if (result == ["result": "success"]) {
                         successMessageCount++
                     }
-                }, { def input, boolean isFault, Throwable exception ->
+                    successCount++
+                }
+            }, { def input, boolean isFault, Throwable exception ->
+                synchronized (lock) {
                     if (exception) {
                         failureExceptionCount++
                         if (!exceptionMessageCount[exception.message])
@@ -115,38 +119,41 @@ class BasicInOutRouteIntegrationSpec extends IntegrationSpec {
                     } else {
                         failureFaultCount++
                     }
-                })
-            }
-
-        then:
-            // possibly asynchronous if configured that way, so wait a little bit for completion if necessary
-            int i
-            for (i = 0; i < 600; i++) {
+                }
+            })
+        }
+        // possibly asynchronous if configured that way, so wait a little bit for completion if necessary
+        int i
+        for (i = 0; i < 800; i++) {
+            synchronized (lock) {
                 if (successCount + failureExceptionCount + failureFaultCount >= quantityToSend) {
                     break
                 }
-                sleep(100) // sleep 100ms each iteration
             }
-            log.info("Received within ${i * 100}ms and successCount = $successCount")
-            assert testName && exceptionMessageCount.keySet() != null && countTestRows() == expectedTestRows
-            assert testName && exceptionMessageCount.keySet() != null && successCount == expectedSuccessCount
-            assert testName && exceptionMessageCount.keySet() != null && successMessageCount == expectedSuccessCount
-            assert testName && exceptionMessageCount.keySet() != null && failureExceptionCount == expectedExceptionCount
-            assert testName && exceptionMessageCount.keySet() != null && (exceptionMessageCount[expectedExceptionMessage] ?: 0) == expectedExceptionCount
-            assert testName && exceptionMessageCount.keySet() != null && failureFaultCount == expectedFaultCount
+            sleep(100) // sleep 100ms each iteration
+        }
+        log.info("Received within ${i * 100}ms and successCount = $successCount")
+
+        then:
+        testName && exceptionMessageCount.keySet() != null && countTestRows() == expectedTestRows
+        testName && exceptionMessageCount.keySet() != null && successCount == expectedSuccessCount
+        testName && exceptionMessageCount.keySet() != null && successMessageCount == expectedSuccessCount
+        testName && exceptionMessageCount.keySet() != null && failureExceptionCount == expectedExceptionCount
+        testName && exceptionMessageCount.keySet() != null && (exceptionMessageCount[expectedExceptionMessage] ?: 0) == expectedExceptionCount
+        testName && exceptionMessageCount.keySet() != null && failureFaultCount == expectedFaultCount
 
         where:
-            //
-            // Test that success messsages, ecceptions thrown and fault messages are all handled correctly.
-            // Also test transaction rollbacks on database inserts when an exception or fault occurs.
-            //
-            testName          | routeEndpoint       | receivePreparationClosure | expectedSuccessCount | expectedTestRows | expectedExceptionCount | expectedExceptionMessage | expectedFaultCount
-            "sedaSuccess"     | sedaRouteEndpoint   | successClosure            | quantityToSend       | quantityToSend   | 0                      | null                     | 0
-            "sedaException"   | sedaRouteEndpoint   | exceptionClosure          | 0                    | 0                | quantityToSend         | "test exception"         | 0
-            "sedaFault"       | sedaRouteEndpoint   | faultClosure              | 0                    | quantityToSend   | quantityToSend         | "{result=success}"       | 0
-            "directSuccess"   | directRouteEndpoint | successClosure            | quantityToSend       | quantityToSend   | 0                      | null                     | 0
-            "directException" | directRouteEndpoint | exceptionClosure          | 0                    | 0                | quantityToSend         | "test exception"         | 0
-            "directFault"     | directRouteEndpoint | faultClosure              | 0                    | quantityToSend   | quantityToSend         | "{result=success}"       | 0
+        //
+        // Test that success messsages, ecceptions thrown and fault messages are all handled correctly.
+        // Also test transaction rollbacks on database inserts when an exception or fault occurs.
+        //
+        testName          | routeEndpoint       | receivePreparationClosure | expectedSuccessCount | expectedTestRows | expectedExceptionCount | expectedExceptionMessage | expectedFaultCount
+        "sedaSuccess"     | sedaRouteEndpoint   | successClosure            | quantityToSend       | quantityToSend   | 0                      | null                     | 0
+        "sedaException"   | sedaRouteEndpoint   | exceptionClosure          | 0                    | 0                | quantityToSend         | "test exception"         | 0
+        "sedaFault"       | sedaRouteEndpoint   | faultClosure              | 0                    | quantityToSend   | quantityToSend         | "{result=success}"       | 0
+        "directSuccess"   | directRouteEndpoint | successClosure            | quantityToSend       | quantityToSend   | 0                      | null                     | 0
+        "directException" | directRouteEndpoint | exceptionClosure          | 0                    | 0                | quantityToSend         | "test exception"         | 0
+        "directFault"     | directRouteEndpoint | faultClosure              | 0                    | quantityToSend   | quantityToSend         | "{result=success}"       | 0
     }
 
     void performTestTransaction(Sql sql) {
