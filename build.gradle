@@ -45,7 +45,7 @@ buildscript {
     dependencies {
         classpath "io.spring.gradle:dependency-management-plugin:${spring_depmgmt_version}"
         classpath "org.grails:grails-gradle-plugin:${grails_gradle_version}"
-        classpath "edu.berkeley.calnet.gradle.plugins:gradle-grails-maven-publish-plugin:0.1-SNAPSHOT"
+        classpath "edu.berkeley.calnet.gradle.plugins:gradle-grails-maven-publish-plugin:${grails_maven_publish_version}"
     }
 }
 
