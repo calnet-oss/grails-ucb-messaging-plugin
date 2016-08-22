@@ -1,34 +1,4 @@
-buildscript {
-    repositories {
-        mavenLocal()
-        // If using a Maven proxy, put the property settings in
-        // ~/.gradle/gradle.properties for default_proxy_url,
-        // default_proxy_username and default_proxy_password.
-        if (project.hasProperty("default_proxy_url")) {
-            maven {
-                url project.property("default_proxy_url")
-                credentials {
-                    username project.property("default_proxy_username")
-                    password project.property("default_proxy_password")
-                }
-            }
-        }
-        jcenter()
-        mavenCentral()
-    }
-    dependencies {
-        classpath "io.spring.gradle:dependency-management-plugin:${spring_depmgmt_version}"
-        classpath "org.grails:grails-gradle-plugin:${grails_gradle_version}"
-    }
-}
-
-apply plugin: 'grails'
-apply plugin: 'project-report'
-apply plugin: "io.spring.dependency-management"
-apply plugin: 'maven-publish'
-
-group = 'edu.berkeley.calnet.grails.plugins'
-version = '1.0.0-SNAPSHOT' /*
+/*
  * Copyright (c) 2016, Regents of the University of California and
  * contributors.
  * All rights reserved.
@@ -53,7 +23,40 @@ version = '1.0.0-SNAPSHOT' /*
  * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */ // !!! Change in GroovySqlUtilGrailsPlugin.groovy too
+ */
+buildscript {
+    repositories {
+        mavenLocal()
+        // If using a Maven proxy, put the property settings in
+        // ~/.gradle/gradle.properties for default_proxy_url,
+        // default_proxy_username and default_proxy_password.
+        if (project.hasProperty("default_proxy_url")) {
+            maven {
+                url project.property("default_proxy_url")
+                credentials {
+                    username project.property("default_proxy_username")
+                    password project.property("default_proxy_password")
+                }
+            }
+        }
+        jcenter()
+        mavenCentral()
+    }
+    dependencies {
+        classpath "io.spring.gradle:dependency-management-plugin:${spring_depmgmt_version}"
+        classpath "org.grails:grails-gradle-plugin:${grails_gradle_version}"
+        classpath "edu.berkeley.calnet.gradle.plugins:gradle-grails-maven-publish-plugin:0.1-SNAPSHOT"
+    }
+}
+
+apply plugin: 'grails'
+apply plugin: 'edu.berkeley.calnet.grails-maven-publish'
+apply plugin: 'maven-publish'
+apply plugin: 'project-report'
+apply plugin: "io.spring.dependency-management"
+
+group = 'edu.berkeley.calnet.grails.plugins'
+version = '1.0.0-SNAPSHOT' // !!! Change in GroovySqlUtilGrailsPlugin.groovy too
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
@@ -94,14 +97,15 @@ dependencies {
      *****************************************************************/
     provided 'javax.servlet:javax.servlet-api'
 
-    test 'org.grails:grails-dependencies'
+    //test 'org.grails:grails-dependencies'
 
     test 'org.spockframework:spock-core'
     /*****************************************************************
      * END STANDARD GRAILS DEPENDENCIES FROM gradle-grails-bom
      *****************************************************************/
 
-    def activeMQVersion = '5.12.1'
+    // version variables are in gradle.properties
+
     compile "org.apache.activemq:activemq-client:$activeMQVersion"
     compile "org.apache.activemq:activemq-pool:$activeMQVersion"
     compile "org.apache.activemq:activemq-camel:$activeMQVersion"
@@ -113,7 +117,6 @@ dependencies {
 
     // Should match the Camel version that the Camel routing plugin is
     // using.
-    def camelVersion = "2.16.1"
     compile "org.apache.camel:camel-spring:$camelVersion"
     compile "org.apache.camel:camel-jms:$camelVersion"
     compile "org.apache.camel:camel-xmljson:$camelVersion"
@@ -131,8 +134,9 @@ publishToMavenLocal.dependsOn assemble
 publishing {
     publications {
         maven(MavenPublication) {
-            artifactId "ucb-messaging"
-            artifact("${project.name}-${project.version}.zip")
+            grailsMavenPublish.addGrailsComponent(project)
+            from components.grails
+            grailsMavenPublish.fixPom(configurations, pom)
         }
     }
 
