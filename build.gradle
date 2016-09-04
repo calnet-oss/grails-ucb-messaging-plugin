@@ -56,7 +56,7 @@ apply plugin: 'project-report'
 apply plugin: "io.spring.dependency-management"
 
 group = 'edu.berkeley.calnet.grails.plugins'
-version = '1.0.1-SNAPSHOT' // !!! Change in GroovySqlUtilGrailsPlugin.groovy too
+version = '1.0.2-SNAPSHOT' // !!! Change in GroovySqlUtilGrailsPlugin.groovy too
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
@@ -107,8 +107,10 @@ dependencies {
     // version variables are in gradle.properties
 
     compile "org.apache.activemq:activemq-client:$activeMQVersion"
-    compile "org.apache.activemq:activemq-pool:$activeMQVersion"
-    compile "org.apache.activemq:activemq-camel:$activeMQVersion"
+    compile("org.apache.activemq:activemq-camel:$activeMQVersion") {
+        // conflicts with Atomikos and not needed if not using Atomikos
+        exclude module: 'geronimo-jta_1.0.1B_spec'
+    }
     test "org.apache.activemq:activemq-broker:$activeMQVersion"
     test "org.apache.activemq:activemq-kahadb-store:$activeMQVersion"
 
