@@ -127,7 +127,7 @@ dependencies {
     compile "org.grails.plugins:routing:1.4.1-UCB3-SNAPSHOT"
 
     // the tests use SqlUtil
-    test "edu.berkeley.calnet.grails.plugins:groovy-sql-util:1.2.0-SNAPSHOT"
+    test "edu.berkeley.calnet.grails.plugins:groovy-sql-util:1.2.2-SNAPSHOT"
 }
 
 grailsMavenPublish.addJavaComponent(project)
