@@ -56,7 +56,7 @@ apply plugin: 'project-report'
 apply plugin: "io.spring.dependency-management"
 
 group = 'edu.berkeley.calnet.grails.plugins'
-version = '1.0.3-SNAPSHOT' // !!! Change in GroovySqlUtilGrailsPlugin.groovy too
+version = '1.0.4-SNAPSHOT' // !!! Change in GroovySqlUtilGrailsPlugin.groovy too
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
@@ -124,7 +124,7 @@ dependencies {
     compile "org.apache.camel:camel-xmljson:$camelVersion"
 
     // Camel plugin
-    compile "org.grails.plugins:routing:1.4.1-UCB2-SNAPSHOT"
+    compile "org.grails.plugins:routing:1.4.1-UCB3-SNAPSHOT"
 
     // the tests use SqlUtil
     test "edu.berkeley.calnet.grails.plugins:groovy-sql-util:1.2.0-SNAPSHOT"
