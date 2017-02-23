@@ -1,4 +1,4 @@
-package ucb.messaging.test
+package edu.berkeley.messaging.test
 
 class UrlMappings {
 

@@ -24,7 +24,7 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package edu.berkeley.messaging.service
+package edu.berkeley.messaging.route
 
 import edu.berkeley.sql.SqlService
 import grails.transaction.Transactional

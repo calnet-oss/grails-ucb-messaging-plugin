@@ -26,7 +26,6 @@
  */
 package edu.berkeley.messaging.route
 
-import edu.berkeley.messaging.service.TestService
 import edu.berkeley.sor.query.util.CamelContextUtil
 import edu.berkeley.sql.SqlService
 import grails.core.GrailsApplication
