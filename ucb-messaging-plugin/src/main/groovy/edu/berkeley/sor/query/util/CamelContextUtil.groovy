@@ -34,7 +34,7 @@ import org.apache.camel.impl.DefaultCamelContext
 class CamelContextUtil {
     CamelContext camelContext // injected
 
-    public Endpoint getEndpoint(CharSequence uri) {
+    Endpoint getEndpoint(CharSequence uri) {
         return camelContext.getEndpoint(uri.toString())
     }
 
@@ -68,7 +68,7 @@ class CamelContextUtil {
      *   camelContext.stop()
      * </code>
      */
-    public static CamelContext createNewCamelContext() {
+    static CamelContext createNewCamelContext() {
         SimpleRegistry registry = new SimpleRegistry()
         DefaultCamelContext camelContext = new DefaultCamelContext(registry)
         camelContext.start()

@@ -30,7 +30,6 @@ import edu.berkeley.sor.query.util.CamelContextUtil
 import edu.berkeley.sql.SqlService
 import grails.core.GrailsApplication
 import grails.test.mixin.integration.Integration
-import grails.transaction.Rollback
 import groovy.sql.Sql
 import groovy.util.logging.Slf4j
 import org.apache.camel.CamelContext
@@ -46,19 +45,14 @@ import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import javax.annotation.PostConstruct
 import javax.sql.DataSource
 
 @Slf4j
 @Integration
-@Rollback
 class BasicInOutRouteIntegrationSpec extends Specification {
 
     static transactional = false
-
-    TestService testService
-    CamelContextUtil camelContextUtil
-    Endpoint _sedaRouteEndpoint
-    Endpoint _directRouteEndpoint
 
     // injected
     CamelContext camelContext
@@ -71,9 +65,34 @@ class BasicInOutRouteIntegrationSpec extends Specification {
     @Shared
     int quantityToSend = 10
 
-    def setup() {
-        camelContextUtil = new CamelContextUtil(camelContext: camelContext)
+    TestService testService
 
+    private static class LazyHolder {
+        Closure<Object> closure
+        private Object value
+
+        def getValue() {
+            if (value == null) {
+                value = closure()
+            }
+        }
+    }
+
+    @Shared
+    CamelContextUtil camelContextUtil = new CamelContextUtil()
+
+    @Shared
+    Closure<Endpoint> sedaRouteEndpointClosure = { camelContextUtil.getEndpoint("seda:routeEndpoint?multipleConsumers=true&blockWhenFull=true") }
+
+    @Shared
+    Closure<Endpoint> directRouteEndpointClosure = { camelContextUtil.getEndpoint("direct:routeEndpoint") }
+
+    @PostConstruct
+    void initSpec() {
+        camelContextUtil.camelContext = camelContext
+    }
+
+    def setup() {
         // Set up the testService
         grailsApplication.mainContext.registerBeanDefinition("testService", BeanDefinitionBuilder.genericBeanDefinition(TestService).beanDefinition)
         testService = (TestService) grailsApplication.mainContext.getBean("testService")
@@ -86,9 +105,9 @@ class BasicInOutRouteIntegrationSpec extends Specification {
         // Launch the test routes
         Endpoint destinationEndpoint = camelContextUtil.getEndpoint("bean:testService?method=receiveMessage")
         // SEDA Route
-        camelContext.addRoutes(new TestRoute(sedaRouteEndpoint, destinationEndpoint))
+        camelContext.addRoutes(new TestRoute(sedaRouteEndpointClosure(), destinationEndpoint))
         // Direct Route
-        camelContext.addRoutes(new TestRoute(directRouteEndpoint, destinationEndpoint))
+        camelContext.addRoutes(new TestRoute(directRouteEndpointClosure(), destinationEndpoint))
         // start routes
         camelContext.startAllRoutes()
 
@@ -127,7 +146,7 @@ class BasicInOutRouteIntegrationSpec extends Specification {
         int failureFaultCount = 0
         Map<String, Integer> exceptionMessageCount = [:]
         testService.receivePreparationClosure = receivePreparationClosure
-        testService.routeEndpoint = routeEndpoint
+        testService.routeEndpoint = routeEndpointClosure()
 
         when:
         for (int i = 0; i < quantityToSend; i++) {
@@ -177,13 +196,13 @@ class BasicInOutRouteIntegrationSpec extends Specification {
         // Test that success messsages, ecceptions thrown and fault messages are all handled correctly.
         // Also test transaction rollbacks on database inserts when an exception or fault occurs.
         //
-        testName          | routeEndpoint       | receivePreparationClosure | expectedSuccessCount | expectedTestRows | expectedExceptionCount | expectedExceptionMessage | expectedFaultCount
-        "sedaSuccess"     | sedaRouteEndpoint   | successClosure            | quantityToSend       | quantityToSend   | 0                      | null                     | 0
-        "sedaException"   | sedaRouteEndpoint   | exceptionClosure          | 0                    | 0                | quantityToSend         | "test exception"         | 0
-        "sedaFault"       | sedaRouteEndpoint   | faultClosure              | 0                    | quantityToSend   | quantityToSend         | "{result=success}"       | 0
-        "directSuccess"   | directRouteEndpoint | successClosure            | quantityToSend       | quantityToSend   | 0                      | null                     | 0
-        "directException" | directRouteEndpoint | exceptionClosure          | 0                    | 0                | quantityToSend         | "test exception"         | 0
-        "directFault"     | directRouteEndpoint | faultClosure              | 0                    | quantityToSend   | quantityToSend         | "{result=success}"       | 0
+        testName          | routeEndpointClosure       | receivePreparationClosure | expectedSuccessCount | expectedTestRows | expectedExceptionCount | expectedExceptionMessage | expectedFaultCount
+        "sedaSuccess"     | sedaRouteEndpointClosure   | successClosure            | quantityToSend       | quantityToSend   | 0                      | null                     | 0
+        "sedaException"   | sedaRouteEndpointClosure   | exceptionClosure          | 0                    | 0                | quantityToSend         | "test exception"         | 0
+        "sedaFault"       | sedaRouteEndpointClosure   | faultClosure              | 0                    | quantityToSend   | quantityToSend         | "{result=success}"       | 0
+        "directSuccess"   | directRouteEndpointClosure | successClosure            | quantityToSend       | quantityToSend   | 0                      | null                     | 0
+        "directException" | directRouteEndpointClosure | exceptionClosure          | 0                    | 0                | quantityToSend         | "test exception"         | 0
+        "directFault"     | directRouteEndpointClosure | faultClosure              | 0                    | quantityToSend   | quantityToSend         | "{result=success}"       | 0
     }
 
     void performTestTransaction(Sql sql) {
@@ -214,19 +233,5 @@ class BasicInOutRouteIntegrationSpec extends Specification {
             performTestTransaction(sql)
             exchange.out.fault = true
         }
-    }
-
-    Endpoint getSedaRouteEndpoint() {
-        if (!_sedaRouteEndpoint) {
-            _sedaRouteEndpoint = new CamelContextUtil(camelContext: camelContext).getEndpoint("seda:routeEndpoint?multipleConsumers=true&blockWhenFull=true"/*"direct:routeEndpoint"*/)
-        }
-        return _sedaRouteEndpoint
-    }
-
-    Endpoint getDirectRouteEndpoint() {
-        if (!_directRouteEndpoint) {
-            _directRouteEndpoint = new CamelContextUtil(camelContext: camelContext).getEndpoint("direct:routeEndpoint")
-        }
-        return _directRouteEndpoint
     }
 }

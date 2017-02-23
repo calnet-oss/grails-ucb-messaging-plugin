@@ -50,7 +50,6 @@ class TestService {
     Closure receivePreparationClosure
 
     void sendMessage(JSONObject json, Closure successClosure, Closure failureClosure) {
-
         DefaultExchange _exchange = new DefaultExchange(routeEndpoint, ExchangePattern.InOut)
         _exchange.in.body = json
         _exchange.setProperty("successClosure", successClosure)
