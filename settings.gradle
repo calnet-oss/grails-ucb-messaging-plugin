@@ -1,1 +1,3 @@
 rootProject.name = 'ucb-messaging'
+
+include 'ucb-messaging-plugin', 'ucb-messaging-test'
