@@ -32,8 +32,7 @@ dependencies {
     compile "org.apache.camel:camel-xmljson:$camelVersion"
 
     // Camel plugin
-    // TODO
-    //compile "org.grails.plugins:routing:1.4.1-UCB3-SNAPSHOT"
+    compile "org.grails.plugins:grails-routing-ucb:2.0.0-UCB1-SNAPSHOT"
 }
 
 bootRun {
