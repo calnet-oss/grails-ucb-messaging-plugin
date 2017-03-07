@@ -31,7 +31,9 @@ import org.apache.camel.AsyncProcessor
 import org.apache.camel.Endpoint
 import org.apache.camel.Exchange
 import org.apache.camel.component.jms.JmsConsumer
+import groovy.util.logging.Slf4j
 
+@Slf4j
 class JmsConsumingListener implements AsyncProcessor {
     Endpoint endpoint // injected by resources.groovy
     def service // injected by BootStrap.groovy
