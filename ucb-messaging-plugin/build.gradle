@@ -8,6 +8,9 @@ dependencyManagement {
     applyMavenExclusions false
 }
 
+// Override Spring Boot
+ext['activemq.version'] = activeMQVersion
+
 dependencies {
     provided 'javax.servlet:javax.servlet-api'
     compileOnly "org.grails:grails-core"
