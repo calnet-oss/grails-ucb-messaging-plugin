@@ -1,0 +1,76 @@
+apply plugin: "org.grails.grails-plugin"
+apply plugin: "maven-publish"
+
+dependencyManagement {
+    imports {
+        mavenBom "org.grails:grails-bom:$grailsVersion"
+    }
+    applyMavenExclusions false
+}
+
+// Override Spring Boot
+ext['activemq.version'] = activeMQVersion
+
+dependencies {
+    provided 'javax.servlet:javax.servlet-api'
+    compileOnly "org.grails:grails-core"
+    compileOnly "org.grails:grails-dependencies"
+    compileOnly "org.grails:grails-plugin-services"
+
+    // version variables are in gradle.properties
+
+    compile "org.apache.activemq:activemq-client:$activeMQVersion"
+    compile("org.apache.activemq:activemq-camel:$activeMQVersion") {
+        // conflicts with Atomikos and not needed if not using Atomikos
+        exclude module: 'geronimo-jta_1.0.1B_spec'
+    }
+
+    // Extra dependencies for the Camel plugin
+    //runtime "org.springframework:spring-beans:4.1.8.RELEASE" // workaround for <=2.4.4 - try taking out for Grails 2.4.5 or greater
+
+    // Should match the Camel version that the Camel routing plugin is
+    // using.
+    compile "org.apache.camel:camel-spring:$camelVersion"
+    compile "org.apache.camel:camel-jms:$camelVersion"
+    compile "org.apache.camel:camel-xmljson:$camelVersion"
+
+    // Camel plugin
+    compile "org.grails.plugins:grails-routing-ucb:2.0.0-UCB1-SNAPSHOT"
+}
+
+bootRun {
+    jvmArgs('-Dspring.output.ansi.enabled=always')
+}
+// enable if you wish to package this plugin as a standalone application
+bootRepackage.enabled = false
+
+jar {
+    from { ["../LICENSE.txt", "../NOTICE_THIRD_PARTY.txt"] }
+}
+task sourceJar(type: Jar) {
+    from sourceSets.main.allGroovy
+}
+// publishing with './gradlew publish'
+publish.dependsOn assemble
+publishToMavenLocal.dependsOn assemble
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifactId rootProject.name
+            from components.java
+            artifact sourceJar { classifier "sources" }
+        }
+    }
+    repositories {
+        maven {
+            // Put the property settings in ~/.gradle/gradle.properties for
+            // default_deploy_url, default_deploy_grails_plugin_repo
+            // default_deploy_username and default_deploy_password.
+            url "${project.property('default_deploy_url')}/${default_deploy_grails_plugin_repo}"
+            credentials {
+                username project.property("default_deploy_user")
+                password project.property("default_deploy_password")
+            }
+        }
+    }
+}
