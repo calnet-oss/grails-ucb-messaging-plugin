@@ -22,9 +22,9 @@ dependencies {
     testCompile "org.apache.activemq:activemq-kahadb-store:$activeMQVersion"
 
     // the tests use SqlUtil
-    testCompile sqlUtilDep
+    testCompile pdep(rootProject.sqlUtilDep)
 
-    compile project(ucbMessagingDep)
+    compile pdep(rootProject.ucbMessagingDep)
 }
 
 bootRun {

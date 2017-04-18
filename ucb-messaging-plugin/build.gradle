@@ -35,7 +35,7 @@ dependencies {
     compile "org.apache.camel:camel-xmljson:$camelVersion"
 
     // Camel plugin
-    compile routingPluginDep
+    compile pdep(rootProject.rootProject.routingPluginDep)
 }
 
 bootRun {
