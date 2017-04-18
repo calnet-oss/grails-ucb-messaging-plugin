@@ -24,7 +24,7 @@ dependencies {
     // the tests use SqlUtil
     testCompile "edu.berkeley.calnet.grails.plugins:groovy-sql-util:1.3.0-SNAPSHOT"
 
-    compile project("$ucbMessagingRef:ucb-messaging-plugin")
+    compile project(ucbMessagingDep)
 }
 
 bootRun {
