@@ -35,7 +35,7 @@ dependencies {
     compile "org.apache.camel:camel-xmljson:$camelVersion"
 
     // Camel plugin
-    compile "org.grails.plugins:grails-routing-ucb:2.0.0-UCB1-SNAPSHOT"
+    compile routingPluginDep
 }
 
 bootRun {
