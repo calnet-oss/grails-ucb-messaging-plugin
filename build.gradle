@@ -28,8 +28,8 @@ buildscript {
                 }
             }
         }
-        maven { url "https://repo.grails.org/grails/core" }
         jcenter()
+        maven { url "https://repo.grails.org/grails/core" }
         mavenCentral()
     }
     dependencies {
@@ -38,14 +38,10 @@ buildscript {
 }
 
 allprojects {
-    apply plugin: 'groovy'
     apply plugin: 'idea'
 
     group = 'edu.berkeley.calnet.grails.plugins'
     version = '1.1.0-SNAPSHOT'
-
-    targetCompatibility = 1.8
-    sourceCompatibility = 1.8
 
     repositories {
         mavenLocal()
@@ -62,6 +58,7 @@ allprojects {
             }
         }
         jcenter()
+        maven { url "https://repo.grails.org/grails/core" }
         mavenCentral()
     }
 }
