@@ -2,7 +2,7 @@ package edu.berkeley.messaging.plugin
 
 import grails.plugins.Plugin
 
-class UcbMessagingPluginGrailsPlugin extends Plugin {
+class UcbMessagingGrailsPlugin extends Plugin {
 
     def grailsVersion = "3.2.5 > *"
     def pluginExcludes = [
