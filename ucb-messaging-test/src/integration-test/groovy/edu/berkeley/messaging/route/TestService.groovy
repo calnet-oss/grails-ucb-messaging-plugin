@@ -27,7 +27,7 @@
 package edu.berkeley.messaging.route
 
 import edu.berkeley.sql.SqlService
-import grails.transaction.Transactional
+import grails.gorm.transactions.Transactional
 import groovy.sql.Sql
 import groovy.util.logging.Slf4j
 import org.apache.camel.Endpoint

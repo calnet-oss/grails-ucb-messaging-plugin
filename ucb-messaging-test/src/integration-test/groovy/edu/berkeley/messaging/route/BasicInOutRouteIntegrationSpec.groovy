@@ -29,7 +29,7 @@ package edu.berkeley.messaging.route
 import edu.berkeley.sor.query.util.CamelContextUtil
 import edu.berkeley.sql.SqlService
 import grails.core.GrailsApplication
-import grails.test.mixin.integration.Integration
+import grails.testing.mixin.integration.Integration
 import groovy.sql.Sql
 import groovy.util.logging.Slf4j
 import org.apache.camel.CamelContext
@@ -39,7 +39,6 @@ import org.apache.camel.ProducerTemplate
 import org.apache.camel.model.RouteDefinition
 import org.grails.web.json.JSONObject
 import org.springframework.beans.factory.support.BeanDefinitionBuilder
-import org.springframework.jdbc.datasource.DataSourceTransactionManager
 import org.springframework.transaction.PlatformTransactionManager
 import spock.lang.Shared
 import spock.lang.Specification
@@ -99,7 +98,7 @@ class BasicInOutRouteIntegrationSpec extends Specification {
         assert producerTemplate
         testService.producerTemplate = producerTemplate
         testService.sqlService = sqlService
-        assert transactionManager instanceof DataSourceTransactionManager
+        assert transactionManager instanceof PlatformTransactionManager
         testService.regTransactionManager = transactionManager
 
         // Launch the test routes
