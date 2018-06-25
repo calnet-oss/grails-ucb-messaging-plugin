@@ -4,7 +4,7 @@ import grails.plugins.Plugin
 
 class UcbMessagingGrailsPlugin extends Plugin {
 
-    def grailsVersion = "3.2.5 > *"
+    def grailsVersion = "3.3.6 > *"
     def pluginExcludes = [
     ]
 
